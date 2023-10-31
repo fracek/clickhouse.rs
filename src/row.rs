@@ -3,6 +3,13 @@ use crate::sql;
 pub trait Row {
     const COLUMN_NAMES: &'static [&'static str];
 
+    fn column_names() -> Vec<String> {
+        Self::COLUMN_NAMES
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>()
+    }
+
     // TODO: count
 }
 
@@ -54,11 +61,12 @@ impl<T> Row for Vec<T> {
 
 /// Collects all field names in depth and joins them with comma.
 pub(crate) fn join_column_names<R: Row>() -> Option<String> {
-    if R::COLUMN_NAMES.is_empty() {
+    let columns = R::column_names();
+    if columns.is_empty() {
         return None;
     }
 
-    let out = R::COLUMN_NAMES
+    let out = columns
         .iter()
         .enumerate()
         .fold(String::new(), |mut res, (idx, name)| {
